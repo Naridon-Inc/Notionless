@@ -34,7 +34,7 @@
     "test:brain": "node --import ./tests/ext-loader.mjs tests/brain-tools.test.mjs",
     "test:relay": "NODE_PATH=\"$PWD/node_modules\" node tests/relay-persist.test.cjs",
     "test:sync": "npm run build:web && NODE_PATH=\"$PWD/node_modules\" node tests/crdt-sync.test.cjs",
-    "build:site": "mkdir -p backend/public && cp landing/index.html landing/*.png landing/*.webp landing/*.svg backend/public/",
+    "build:site": "mkdir -p backend/public && cp landing/index.html landing/stats.html landing/*.js landing/*.png landing/*.webp landing/*.svg backend/public/",
     "deploy:lightsail": "aws lightsail create-container-service-deployment --service-name ${LIGHTSAIL_SERVICE:-notionless} --cli-input-json file://lightsail-deployment.json"
   },
   "build": {

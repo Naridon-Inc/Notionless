@@ -29,6 +29,29 @@ Point a DNS **A record** for `docs.yourcompany.com` at the box. Open
 
 ---
 
+## Choose your mode (one switch)
+
+The bundle runs in one of two modes, set by **`NL_MODE`** in `.env`. Both keep the
+same end-to-end encryption — the difference is only *where availability comes from*.
+
+| | `NL_MODE=online` *(default)* | `NL_MODE=p2p` |
+|---|---|---|
+| **What your team gets** | A **full online Notion**: a web app on your domain, usable from any browser, with docs synced across **web + desktop + mobile** | A **pure relay** — your devices/apps sync **directly peer-to-peer** |
+| **The box** | Stores every note **encrypted**, serves it **24/7**, and relays **realtime collab** even when no one's online | Brokers connections only — **stores nothing** |
+| **Availability** | Always on | Whenever ≥1 device/teammate is online |
+| **Privacy** | Ciphertext only — the box can never read a note | Nothing ever lands on the box |
+
+That's the whole choice. `online` is the default because it's what most people want
+from "host my own Notion." Set `NL_MODE=p2p` if you only want an always-available
+*relay* and prefer notes to live solely on members' devices. Either way it's **your**
+box — Naridon hosts nothing of yours.
+
+> Individual members can also opt their **own** client back to pure P2P at runtime
+> (without changing the server) from inside the app — click the small sync dot next
+> to a teamspace in the sidebar.
+
+---
+
 ## Don't want to touch a terminal? Ask an AI agent
 
 Paste this prompt into **Claude Code** (or Cursor, Codex, or any coding agent)
@@ -256,17 +279,21 @@ without signing in through the web app.
 
 ## Always-on sync (notes available 24/7)
 
-On by default in this bundle: the relay keeps each note's **encrypted** state in a
-Docker volume, so notes are available even when every laptop is closed. To run
-**pure peer-to-peer** instead (the box stores nothing), blank both:
+On by default in this bundle (`NL_MODE=online`): the relay keeps each note's
+**encrypted** state in a Docker volume, so notes are available even when every
+laptop is closed. To run **pure peer-to-peer** instead (the box stores nothing),
+flip the one switch:
 
 ```bash
-NL_PERSIST_DIR=
-NL_CLOUD_SYNC_URL=
+NL_MODE=p2p
 ```
 
-The privacy story is identical either way — the box only ever holds ciphertext.
-Deep dive: **[SELF_HOSTED_SYNC.md](./SELF_HOSTED_SYNC.md)**.
+That's all — `NL_MODE` drives both the relay (stop persisting) and the web app
+(stop mirroring). The `NL_PERSIST_DIR` / `NL_CLOUD_SYNC_URL` knobs below are
+advanced overrides you normally leave blank; set them only for non-standard layouts
+(e.g. pointing the web app at a *different* box). The privacy story is identical
+either way — the box only ever holds ciphertext. Deep dive:
+**[SELF_HOSTED_SYNC.md](./SELF_HOSTED_SYNC.md)**.
 
 ---
 
@@ -290,10 +317,11 @@ Everything is driven by `.env` (copied from `.env.selfhost.example`):
 
 | Variable | Default | What it does |
 |---|---|---|
+| `NL_MODE` | `online` | **The one switch.** `online` = full online app (24/7 encrypted storage + realtime sync). `p2p` = pure relay that stores nothing. Drives both services. |
 | `NL_DOMAIN` | `:80` | Your public hostname → automatic HTTPS. `:80` = local HTTP. |
 | `NL_TLS_EMAIL` | _(unset)_ | Let's Encrypt account email (cert-expiry notices). |
-| `NL_PERSIST_DIR` | `/data` | Turns on always-on encrypted sync. Blank = pure P2P. |
-| `NL_CLOUD_SYNC_URL` | `/yjs` | Tells clients to mirror to the box. Blank = pure P2P. |
+| `NL_PERSIST_DIR` | _(unset → `/data` in online mode)_ | Advanced: relay's encrypted-state folder. Leave blank; `NL_MODE` sets it. |
+| `NL_CLOUD_SYNC_URL` | _(unset → `/yjs` in online mode)_ | Advanced: where clients mirror. Leave blank; set only to point at a different box. |
 | `NL_ACCOUNTS` | _(off)_ | `1` shows the email/password sign-in gate. |
 | `NL_ACCOUNTS_SIGNUP` | `open` | `open` (self-serve) or `closed` (admin-added). |
 | `NL_ACCOUNTS_STRICT` | _(off)_ | `1` also rejects unauthenticated sync. |
@@ -323,6 +351,6 @@ Everything is driven by `.env` (copied from `.env.selfhost.example`):
 - Accounts (if enabled) gate *access to the instance*, never the *contents* of
   notes — that's a hard property of the end-to-end encryption, not a setting.
 
-Leave `NL_ACCOUNTS`, `NL_PERSIST_DIR`, and `NL_CLOUD_SYNC_URL` unset and you're
-back to pure, serverless, end-to-end-encrypted peer-to-peer — just hosted on your
+Set `NL_MODE=p2p` (and leave `NL_ACCOUNTS` unset) and you're back to pure,
+serverless, end-to-end-encrypted peer-to-peer — just with the relay hosted on your
 own domain.

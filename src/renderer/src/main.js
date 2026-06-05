@@ -44,6 +44,7 @@ import {
 } from './team-dialogs'
 import { identity } from './identity'
 import { contactStore, startInbox, getReceivedOffers, removeReceivedOffer } from './contacts'
+import { syncDotColor, syncDotTitle, openSyncPopover } from './cloud-sync'
 import { applyEditorFont, loadEditorFont } from './fonts'
 import { CompanyBrainCenter } from './brain-drawer'
 import { initReminderWatcher } from './cm-mention'
@@ -3229,12 +3230,12 @@ function renderP2PTeams() {
         group.className = 'ts-group'
 
         const online = p2pTeamManager.getOnlinePeers(team.teamId)
-        // ≥1 OTHER member online = latest state is reachable (the availability contract).
+        // ≥1 OTHER member online = latest state is reachable (the P2P availability
+        // contract). In always-on cloud mode the box covers availability instead,
+        // so the dot reflects that (see cloud-sync.js).
         const live = online.others > 0
-        const dotColor = live ? '#3aa757' : '#c9c9c9'
-        const syncTitle = live
-            ? `${online.others} teammate${online.others === 1 ? '' : 's'} online — syncing`
-            : 'No teammates online — changes sync when someone connects'
+        const dotColor = syncDotColor({ live })
+        const syncTitle = syncDotTitle({ live, others: online.others })
 
         const header = document.createElement('div')
         header.className = 'ts-group-header expanded'
@@ -3242,7 +3243,7 @@ function renderP2PTeams() {
             <i class="fas fa-chevron-circle-right ts-caret" style="font-size:12px;color:#bbb;width:14px;"></i>
             <span class="ts-group-icon"><i class="fas fa-users" style="font-size:12px;color:#ea4e43;"></i></span>
             <span class="ts-group-name" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(team.name)}</span>
-            <span class="p2p-online-dot" title="${esc(syncTitle)}" style="width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;flex-shrink:0;"></span>
+            <span class="p2p-online-dot" title="${esc(syncTitle)}" style="width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;flex-shrink:0;cursor:pointer;"></span>
             <span class="ts-group-actions" style="display:none;gap:4px;">
                 <i class="fas fa-plus icon-btn p2p-add-note" title="New note" style="font-size:11px;opacity:0.7;"></i>
                 <i class="fas fa-user-friends icon-btn p2p-roster" title="Members" style="font-size:11px;opacity:0.7;"></i>
@@ -3319,6 +3320,11 @@ function renderP2PTeams() {
             const expanded = children.classList.toggle('expanded')
             children.style.display = expanded ? 'block' : 'none'
             header.classList.toggle('expanded', expanded)
+        }
+        const dotEl = header.querySelector('.p2p-online-dot')
+        if (dotEl) dotEl.onclick = (ev) => {
+            ev.stopPropagation()
+            openSyncPopover(dotEl)
         }
         const addBtn = header.querySelector('.p2p-add-note')
         if (addBtn) addBtn.onclick = (ev) => {

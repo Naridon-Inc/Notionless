@@ -78,33 +78,43 @@ Notes:
 
 ## 3. Maker's first comment (post this the second you launch)
 
-> Hey Product Hunt 👋
+> Hey Product Hunt 👋 — maker here.
 >
 > I built Notionless because I wanted Notion's editor and databases without
-> handing my company's entire brain to someone else's database. So Notionless is
-> **local-first**: every note is a plain Markdown file in a folder *you* own. No
-> account, no sign-up — you create a team and share one link, and edits sync
-> directly between devices, **end-to-end encrypted**. The only thing we host is a
-> tiny stateless relay that brokers connections and sees nothing but ciphertext.
+> handing my team's entire brain to someone else's cloud. So I made the opposite
+> trade: every note is a plain Markdown file in a folder **you** own, on your own
+> machine.
 >
-> The part I'm most excited about: the **Company Brain**. It reads across your
-> whole workspace and answers in plain language, with citations to the exact
-> notes it used. Retrieval is 100% local — your notes are never bulk-uploaded to
-> be searched. And the answer model is **pluggable**: point it at the **Claude
-> Code** you already run, a fully-offline local model (Ollama), or your own API
-> key. So you get a genuinely smart workspace assistant *without* a new
-> subscription and without your notes leaving your machine to be indexed.
+> There's no account and no sign-up. You create a team, share **one link**, and
+> edits sync directly between devices over WebRTC — end-to-end encrypted with
+> libsodium. The only thing I host is a tiny stateless relay that helps peers find
+> each other; it sees hashed topics and ciphertext, stores nothing, and you can
+> self-host it with Docker in about a minute.
 >
-> It's **AGPL-3.0 and fully open source** — client and relay both on GitHub. macOS
-> ships today (universal, Apple Silicon + Intel), there's a native iOS/Android
-> companion, and Windows/Linux are on the roadmap.
+> The part I'm most excited about is the **Company Brain**. It reads across your
+> whole workspace and answers in plain language, citing the exact notes it used.
+> Retrieval is **100% local** — your notes are never bulk-uploaded to be searched.
+> And the answer model is *yours*: point it at the **Claude Code** you already
+> run, a fully-offline local model (Ollama), or your own API key. A genuinely
+> smart workspace assistant — no new subscription, and nothing leaves your machine
+> to be indexed.
 >
-> Honest about trade-offs: it's built for **small teams**, there's no remote
-> revocation (removing someone = rotating the team link), and anyone with a team
-> link can read that team's roster — all documented on the site and in the repo.
+> It's **AGPL-3.0 and fully open source** — both the app and the relay are on
+> GitHub. macOS ships today (universal, Apple Silicon + Intel, signed &
+> notarized), there's a native iOS/Android companion, and Windows/Linux are on the
+> roadmap.
 >
-> Would love your feedback, especially on the Brain + Claude Code integration.
-> Happy to answer anything! 🙏
+> Honest trade-offs, all documented: it's built for **small teams** (the P2P mesh
+> has limits), there's no remote revocation yet (removing someone = rotating the
+> team link), and anyone with a team link can read that team's roster. I'd rather
+> you hear that from me than find it later.
+>
+> I'd love your feedback — especially on the Brain + Claude Code integration.
+> **What would it take for you to trust your own team's docs to something like
+> this?**
+>
+> ⬇️ macOS download + source: https://github.com/Naridon-Inc/Notionless · site:
+> https://oss.naridon.com
 
 ---
 

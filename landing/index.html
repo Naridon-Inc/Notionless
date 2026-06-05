@@ -326,6 +326,23 @@
         .ai-copy:hover { background: rgba(47,158,110,0.22); }
         .ai-copy.copied { color: #fff; background: var(--accent); border-color: var(--accent); }
         .ai-prompt-body { margin: 0; padding: 16px 18px 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 340px; overflow: auto; }
+        /* Two-mode chooser (free P2P vs full online) */
+        .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 6px auto 52px; max-width: 920px; }
+        .mode-card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px 22px 22px; }
+        .mode-card.featured { border-color: var(--accent-line); background: linear-gradient(180deg, var(--accent-soft), transparent 60%), var(--panel); }
+        .mode-tag { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); display: inline-flex; align-items: center; gap: 7px; }
+        .mode-card.featured .mode-tag { color: var(--accent-bright); }
+        .mode-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .mode-card h4 { font-size: 19px; letter-spacing: -0.01em; margin: 12px 0 8px; color: var(--text); }
+        .mode-card p { color: var(--muted); font-size: 14px; line-height: 1.62; margin: 0 0 14px; }
+        .mode-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+        .mode-list li { display: flex; gap: 9px; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+        .mode-list li svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--accent); }
+        .mode-list li b { color: var(--text); font-weight: 600; }
+        .mode-card code { font-family: var(--mono); font-size: 12px; background: var(--panel-2); border: 1px solid var(--line-soft); padding: 1px 6px; border-radius: 5px; color: var(--accent-bright); }
+        .mode-foot { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--faint); }
+        .mode-foot code { color: var(--green); }
+        @media (max-width: 760px) { .modes { grid-template-columns: 1fr; } }
         @media (max-width: 640px) {
             .deploy-tabbar { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
             .deploy-tab { flex: 0 0 auto; }
@@ -618,6 +635,35 @@
     <section class="section-pad brain" id="selfhost" style="border-top: 1px solid var(--line-soft);">
         <div class="brain-glow" aria-hidden="true"></div>
         <div class="container">
+            <div class="deploy-head" style="margin-bottom: 26px;">
+                <div class="eyebrow c">Offline or online — your call</div>
+                <h3 class="deploy-title">Two ways to run Notionless</h3>
+                <p class="deploy-sub">Use it free with nothing to host, or self-host the full online app on your own box. Same notes, same encryption — you pick the trade-off.</p>
+            </div>
+            <div class="modes">
+                <div class="mode-card">
+                    <span class="mode-tag"><span class="dot"></span>Free · nothing to host</span>
+                    <h4>Just use the apps</h4>
+                    <p>Install the desktop or mobile app and go. Your devices and teammates sync <b>directly, peer-to-peer</b>, end-to-end encrypted. The only thing in the middle is Naridon's <b>free global relay</b> that helps peers find each other — it brokers connections and <b>stores nothing, not even your docs</b>.</p>
+                    <ul class="mode-list">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Zero setup, zero accounts, fully local files</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Works offline; syncs when a device is online</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><b>We never see your notes</b> — there's nowhere for them to land</span></li>
+                    </ul>
+                    <div class="mode-foot">Best when everyone uses the app and you want nothing to maintain.</div>
+                </div>
+                <div class="mode-card featured">
+                    <span class="mode-tag"><span class="dot"></span>Self-hosted · your own Notion</span>
+                    <h4>Run the full online app</h4>
+                    <p>One command on <b>your own box</b> brings up a <b>Notion-style web app</b> you can open from any browser, anywhere — with every note <b>stored encrypted and available 24/7</b> and <b>always-on realtime collaboration</b>, even with every laptop closed. Docs stay synced across <b>web, desktop and mobile</b>. The box only ever holds ciphertext — it can never read a word.</p>
+                    <ul class="mode-list">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Browser app on your domain — nothing for teammates to install</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>24/7 encrypted storage + realtime sync across all your devices</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span>Optional email/password sign-in · <b>runs on your hardware, not ours</b></span></li>
+                    </ul>
+                    <div class="mode-foot">One switch flips it: <code>NL_MODE=online</code> (default) or <code>NL_MODE=p2p</code>.</div>
+                </div>
+            </div>
             <div class="brain-grid">
                 <div>
                     <div class="eyebrow">Self-host</div>
@@ -807,7 +853,7 @@ Explain each step as you go, and confirm before anything destructive.</pre>
                     <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01" stroke-linecap="round"/></svg></div>
                     <span class="tag">The only server</span>
                     <h4>Stateless relay</h4>
-                    <p>One tiny service helps peers find each other over hashed topics. No database, no accounts, stores nothing — and you can self-host it in seconds.</p>
+                    <p>One tiny service helps peers find each other over hashed topics. No database, no accounts — by default it stores nothing. Self-host it in seconds, or flip it into a full online app that keeps your encrypted notes available 24/7.</p>
                 </div>
             </div>
 
@@ -924,7 +970,7 @@ Explain each step as you go, and confirm before anything destructive.</pre>
                 </details>
                 <details>
                     <summary>Can I self-host it on my own domain? <span class="chev">+</span></summary>
-                    <p>Yes — the whole thing, not just the relay. Clone the repo, copy <code>.env.selfhost.example</code> to <code>.env</code>, set <code>NL_DOMAIN=docs.yourcompany.com</code>, and run <code>docker compose -f docker-compose.selfhost.yml up -d</code>. That brings up the <b>web app and the relay together</b> on your domain, with an automatic Let's Encrypt certificate — <b>no database to set up</b>. Your team just opens it in a browser; nothing to install. Prefer only the relay? Point a desktop build at it with <code>VITE_SIGNALING_URL</code>. See the <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">self-hosting guide</a>.</p>
+                    <p>Yes — and you get more than a relay. Clone the repo, copy <code>.env.selfhost.example</code> to <code>.env</code>, set <code>NL_DOMAIN=docs.yourcompany.com</code>, and run <code>docker compose -f docker-compose.selfhost.yml up -d</code>. That brings up a full <b>online Notion on your own box</b>: a browser app on your domain (automatic Let's Encrypt cert, <b>no database</b>), every note <b>stored encrypted and available 24/7</b>, always-on realtime collab, and docs synced across <b>web, desktop and mobile</b>. The box only ever holds ciphertext — it can never read your notes, and it's <b>your hardware, not ours</b>. One switch picks the trade-off: <code>NL_MODE=online</code> (the default above) or <code>NL_MODE=p2p</code> for a pure peer-to-peer relay that stores nothing. See the <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">self-hosting guide</a>.</p>
                 </details>
                 <details>
                     <summary>Is there a web app, and can it have a company login? <span class="chev">+</span></summary>
@@ -977,7 +1023,7 @@ Explain each step as you go, and confirm before anything destructive.</pre>
                 </div>
             </div>
             <div class="foot-bottom">
-                <span class="mono">&copy; 2026 Notionless · Built by Naridon</span>
+                <span class="mono">&copy; 2026 Notionless · an <b style="color:var(--muted);font-weight:600;">OSS</b> (Open Source Software Initiatives) project by Naridon, Inc.</span>
                 <span>Made for people who like to own their notes.</span>
             </div>
         </div>

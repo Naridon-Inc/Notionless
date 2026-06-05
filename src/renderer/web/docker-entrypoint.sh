@@ -10,6 +10,17 @@
 set -e
 CONFIG_FILE=/srv/nlconfig.js
 
+# NL_MODE is the one-word switch for the whole bundle (see docker-compose.selfhost.yml):
+#   online (default) → clients ALSO mirror to the always-on box. If NL_CLOUD_SYNC_URL
+#                      is unset we default it to "/yjs" (same origin behind the proxy).
+#   p2p              → pure peer-to-peer; never emit CLOUD_SYNC_URL so clients stay
+#                      serverless even if a stale NL_CLOUD_SYNC_URL is in the env.
+if [ "$NL_MODE" = "p2p" ]; then
+  NL_CLOUD_SYNC_URL=""
+elif [ -z "$NL_CLOUD_SYNC_URL" ]; then
+  NL_CLOUD_SYNC_URL="/yjs"
+fi
+
 {
   echo "// Generated at container start from env — do not edit."
   echo "window.__NL_CONFIG = {"

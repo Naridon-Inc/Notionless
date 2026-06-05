@@ -318,8 +318,14 @@ export class P2PNetwork {
     // see docs/SELF_HOSTED_SYNC.md.
     let configured = (Config && Config.CLOUD_SYNC_URL) || ''
     try {
-      const override = typeof localStorage !== 'undefined' && localStorage.getItem('notionless_cloud_sync_url')
-      if (override) configured = override
+      if (typeof localStorage !== 'undefined') {
+        // Explicit per-user opt-out (the in-app "always-on sync" toggle). Lets
+        // someone on a full-online self-host bundle drop their OWN client back to
+        // pure peer-to-peer at runtime — no rebuild, no server change.
+        if (localStorage.getItem('notionless_cloud_sync_disabled') === '1') return
+        const override = localStorage.getItem('notionless_cloud_sync_url')
+        if (override) configured = override
+      }
     } catch (_e) { /* localStorage may be unavailable */ }
     const base = String(configured || '').replace(/\/$/, '')
     if (!base || this._destroyed) return

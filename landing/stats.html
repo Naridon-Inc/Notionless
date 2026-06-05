@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Notionless — site analytics</title>
+<style>
+  :root{ --bg:#0b0c0e; --panel:#131519; --line:rgba(255,255,255,0.09); --text:#f3f4f6;
+    --muted:#9aa1ac; --faint:#686e79; --accent:#2f9e6e; --green:#5fd6a0;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif; padding:38px 28px 80px; }
+  .wrap{ max-width:1040px; margin:0 auto; }
+  h1{ font-size:22px; font-weight:650; letter-spacing:-0.01em; display:flex; align-items:center; gap:11px; }
+  h1 .dot{ width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(95,214,160,0.16); }
+  .sub{ color:var(--faint); font-family:var(--mono); font-size:12.5px; margin-top:6px; }
+  .bar{ display:flex; gap:10px; align-items:center; margin:22px 0 26px; flex-wrap:wrap; }
+  input,select,button{ font:inherit; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:9px 13px; font-size:14px; }
+  input{ width:300px; font-family:var(--mono); font-size:13px; }
+  button{ cursor:pointer; background:var(--text); color:#0b0c0e; font-weight:600; border:none; }
+  button:hover{ background:#fff; }
+  .err{ color:#ff8c8c; font-family:var(--mono); font-size:13px; margin:10px 0; }
+  .cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:8px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 18px 16px; }
+  .card .n{ font-size:34px; font-weight:680; letter-spacing:-0.02em; }
+  .card .k{ font-family:var(--mono); font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); margin-top:6px; }
+  .card .n .g{ background:linear-gradient(96deg,var(--accent),var(--green)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px; }
+  .box{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+  .box h2{ font-size:13px; font-weight:600; letter-spacing:0.02em; color:var(--muted); margin-bottom:14px; display:flex; justify-content:space-between; }
+  .row{ display:flex; align-items:center; gap:10px; margin:7px 0; font-size:14px; }
+  .row .lbl{ flex:0 0 42%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+  .row .meter{ flex:1; height:8px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden; }
+  .row .meter i{ display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--green)); border-radius:6px; }
+  .row .v{ flex:0 0 46px; text-align:right; font-family:var(--mono); font-size:12.5px; color:var(--muted); }
+  .empty{ color:var(--faint); font-family:var(--mono); font-size:12.5px; }
+  .spark{ display:flex; align-items:flex-end; gap:3px; height:72px; margin-top:6px; }
+  .spark .d{ flex:1; background:linear-gradient(180deg,var(--green),var(--accent)); border-radius:3px 3px 0 0; min-height:2px; opacity:.9; }
+  .feed{ font-family:var(--mono); font-size:12px; color:var(--muted); max-height:260px; overflow:auto; }
+  .feed div{ padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .feed .t{ color:var(--faint); } .feed .e{ color:var(--green); }
+  .full{ grid-column:1 / -1; }
+  @media(max-width:760px){ .cards{grid-template-columns:repeat(2,1fr)} .grid{grid-template-columns:1fr} input{width:200px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="dot"></span> Notionless — site analytics</h1>
+  <div class="sub">first-party · cookieless · bots excluded · oss.naridon.com</div>
+
+  <div class="bar">
+    <input id="token" type="password" placeholder="access token (ANALYTICS_TOKEN)" autocomplete="off">
+    <select id="days">
+      <option value="1">Today</option>
+      <option value="7">7 days</option>
+      <option value="30" selected>30 days</option>
+      <option value="90">90 days</option>
+    </select>
+    <button id="go">Load</button>
+  </div>
+  <div id="err" class="err"></div>
+
+  <div class="cards">
+    <div class="card"><div class="n g" id="m-views">—</div><div class="k">Pageviews</div></div>
+    <div class="card"><div class="n" id="m-uniq">—</div><div class="k">Unique visitors</div></div>
+    <div class="card"><div class="n" id="m-dl">—</div><div class="k">Download clicks</div></div>
+    <div class="card"><div class="n" id="m-mob">—</div><div class="k">Mobile share</div></div>
+  </div>
+
+  <div class="box full" style="margin-top:16px">
+    <h2><span>Pageviews by day</span><span id="range" class="empty"></span></h2>
+    <div class="spark" id="spark"></div>
+  </div>
+
+  <div class="grid">
+    <div class="box"><h2>Top referrers</h2><div id="refs"></div></div>
+    <div class="box"><h2>Top sources (UTM / ref)</h2><div id="srcs"></div></div>
+    <div class="box"><h2>Top pages</h2><div id="paths"></div></div>
+    <div class="box"><h2>Clicks</h2><div id="clicks"></div></div>
+    <div class="box"><h2>Browsers</h2><div id="browsers"></div></div>
+    <div class="box"><h2>OS</h2><div id="os"></div></div>
+    <div class="box full"><h2>Recent activity</h2><div class="feed" id="feed"></div></div>
+  </div>
+</div>
+
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  try { $('token').value = sessionStorage.getItem('nl-stats-token') || ''; } catch (e) {}
+
+  function bars(el, items, max) {
+    el = $(el);
+    if (!items || !items.length) { el.innerHTML = '<div class="empty">no data yet</div>'; return; }
+    var top = max || items[0].count || 1;
+    el.innerHTML = items.map(function (it) {
+      var pct = Math.max(3, Math.round((it.count / top) * 100));
+      return '<div class="row"><span class="lbl">' + esc(it.key) + '</span>' +
+             '<span class="meter"><i style="width:' + pct + '%"></i></span>' +
+             '<span class="v">' + it.count + '</span></div>';
+    }).join('');
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+  function clicksToItems(o) { return Object.entries(o || {}).map(function (e) { return { key: e[0], count: e[1] }; }).sort(function (a, b) { return b.count - a.count; }); }
+
+  function render(d) {
+    $('m-views').textContent = d.totals.pageviews.toLocaleString();
+    $('m-uniq').textContent = d.totals.uniqueVisitors.toLocaleString();
+    $('m-dl').textContent = (d.clicks && (d.clicks.download || 0)).toLocaleString();
+    $('m-mob').textContent = d.totals.mobileShare + '%';
+    $('range').textContent = d.range.from ? (d.range.from + ' → ' + d.range.to) : '';
+
+    var days = d.byDay || [];
+    var maxV = days.reduce(function (m, x) { return Math.max(m, x.views); }, 1);
+    $('spark').innerHTML = days.map(function (x) {
+      return '<span class="d" style="height:' + Math.max(2, Math.round((x.views / maxV) * 100)) + '%" title="' + x.day + ': ' + x.views + ' views, ' + x.uniques + ' uniques"></span>';
+    }).join('') || '<div class="empty">no data yet</div>';
+
+    bars('refs', d.topReferrers);
+    bars('srcs', d.topSources);
+    bars('paths', d.topPaths);
+    bars('clicks', clicksToItems(d.clicks));
+    bars('browsers', d.browsers);
+    bars('os', d.os);
+
+    $('feed').innerHTML = (d.recent || []).map(function (e) {
+      var when = (e.ts || '').replace('T', ' ').slice(5, 16);
+      var what = e.event === 'click' ? ('click:' + (e.label || '?')) : 'view';
+      var ctx = e.refHost ? (' ← ' + e.refHost) : (e.src ? (' ← ' + e.src) : '');
+      return '<div><span class="t">' + esc(when) + '</span>  <span class="e">' + esc(what) + '</span>  ' + esc(e.path || '') + esc(ctx) + '</div>';
+    }).join('') || '<div class="empty">no events yet</div>';
+  }
+
+  function load() {
+    var token = $('token').value.trim();
+    try { sessionStorage.setItem('nl-stats-token', token); } catch (e) {}
+    $('err').textContent = '';
+    fetch('/api/stats?days=' + $('days').value + '&token=' + encodeURIComponent(token))
+      .then(function (r) { if (!r.ok) throw new Error(r.status === 401 ? 'Unauthorized — check the token.' : ('HTTP ' + r.status)); return r.json(); })
+      .then(render)
+      .catch(function (e) { $('err').textContent = e.message; });
+  }
+  $('go').addEventListener('click', load);
+  $('token').addEventListener('keydown', function (e) { if (e.key === 'Enter') load(); });
+  $('days').addEventListener('change', load);
+  if ($('token').value) load();
+</script>
+</body>
+</html>

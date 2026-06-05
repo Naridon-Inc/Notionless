@@ -17,6 +17,19 @@ sees your password, your keys, or a single word of your notes.
 No accounts. No database to manage. No login system to build. Three steps,
 about five minutes.
 
+> **Two compose files — pick the one that matches what you want:**
+>
+> - **`docker-compose.cloud.yml`** *(this guide)* — just the **always-on box**:
+>   the relay with encrypted persistence turned on. Add it to a team that already
+>   uses the desktop/mobile apps so notes stay available 24/7. No web app.
+> - **`docker-compose.selfhost.yml`** — the **full online app**: the box **plus a
+>   Notion-style web app on your own domain**, so teammates open it in any browser
+>   and your docs stay synced across **web + desktop + mobile**. It already defaults
+>   to this always-on mode (`NL_MODE=online`). See
+>   **[SELF_HOSTING.md](./SELF_HOSTING.md)**.
+>
+> Both store only ciphertext on **your** box — Naridon hosts nothing of yours.
+
 ---
 
 ## What you need

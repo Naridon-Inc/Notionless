@@ -22,7 +22,17 @@ const ALLOWED_ORIGINS = [
 // state in one binary file there, so a self-hosted box can serve the latest note
 // even when no human is online. It only ever stores E2EE ciphertext keyed by the
 // hashed room name — never accounts, keys, or plaintext.
-const PERSIST_DIR = process.env.YJS_PERSIST_DIR || null;
+//
+// NL_MODE is the single one-word switch the self-host bundle uses:
+//   - "p2p"    → force pure stateless relay (store nothing), even if a stale
+//                YJS_PERSIST_DIR is still set in the environment.
+//   - "online" → full online mode; YJS_PERSIST_DIR (default /data in the bundle)
+//                turns persistence on. This is the bundle default.
+// Anything else falls through to the raw YJS_PERSIST_DIR value, so the relay
+// keeps working standalone (no NL_MODE) exactly as before.
+const PERSIST_DIR = process.env.NL_MODE === 'p2p'
+  ? null
+  : (process.env.YJS_PERSIST_DIR || null);
 
 module.exports = {
   PORT,

@@ -23,12 +23,20 @@ services:
     environment:
       - PORT=9008
       - NODE_ENV=production
+      # ┌─ THE ONE SWITCH ─────────────────────────────────────────────────────┐
+      # │ NL_MODE=online (default) → the full online app: this box stores every  │
+      # │   note's ENCRYPTED state and serves it 24/7, so your team gets a       │
+      # │   Notion-style web app synced across web + desktop + mobile.           │
+      # │ NL_MODE=p2p → pure peer-to-peer: the box brokers connections and       │
+      # │   stores NOTHING (forces persistence + cloud-sync off on both sides).  │
+      # └────────────────────────────────────────────────────────────────────────┘
+      - NL_MODE=${NL_MODE:-online}
       # Restrict which web origins may call the relay's HTTP API. Defaults to
       # your domain; the same-origin web app is always allowed.
       - ALLOWED_ORIGINS=${NL_ALLOWED_ORIGINS:-}
       # Always-on encrypted sync: the relay keeps each note's CIPHERTEXT here so
       # notes stay available 24/7 even with every laptop closed. It can never
-      # read them. Blank this (and NL_CLOUD_SYNC_URL) for pure stateless P2P.
+      # read them. (NL_MODE=p2p forces this off regardless of the path below.)
       - YJS_PERSIST_DIR=${NL_PERSIST_DIR:-/data}
       # Optional accounts layer (hybrid identity). OFF unless NL_ACCOUNTS=1. An
       # access gate for this web instance — it never holds note keys (E2EE stays
@@ -56,14 +64,18 @@ services:
       - "80:80"
       - "443:443"
     environment:
+      # Same one switch as the relay (see above). online → the served web app
+      # mirrors notes to this box; p2p → the web app stays pure peer-to-peer.
+      - NL_MODE=${NL_MODE:-online}
       # Your public hostname → automatic Let's Encrypt HTTPS. `:80` = plain HTTP.
       - NL_DOMAIN=${NL_DOMAIN:-:80}
       - NL_TLS_EMAIL=${NL_TLS_EMAIL:-}
       # The relay is reachable as the compose service name.
       - NL_RELAY_UPSTREAM=relay:9008
-      # Tell clients to also mirror to the always-on box (matches YJS_PERSIST_DIR
-      # above). Blank both for pure P2P. "/yjs" resolves to this same origin.
-      - NL_CLOUD_SYNC_URL=${NL_CLOUD_SYNC_URL:-/yjs}
+      # Tell clients to also mirror to the always-on box. Leave blank to inherit
+      # the NL_MODE default ("/yjs" on the same origin); set it only to point the
+      # web app at a DIFFERENT box. NL_MODE=p2p forces it off either way.
+      - NL_CLOUD_SYNC_URL=${NL_CLOUD_SYNC_URL:-}
       # Where the "Download the desktop app" links point (defaults to the
       # official GitHub release). Point at your own mirror if you fork.
       - NL_DOWNLOAD_URL=${NL_DOWNLOAD_URL:-}

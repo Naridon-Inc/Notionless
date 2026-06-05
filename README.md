@@ -127,6 +127,21 @@ stays local.
 
 ## Self-hosting (run it on your own domain)
 
+### Two ways to run it
+
+| | **Free — nothing to host** | **Self-hosted — your own online Notion** |
+|---|---|---|
+| **What** | Desktop + mobile apps, syncing **directly peer-to-peer** | A **Notion-style web app on your own box**, open from any browser anywhere |
+| **The server** | Naridon's **free global relay** (`oss.naridon.com`) just helps peers find each other — **stores nothing, not even your docs** | **Your** box stores every note **encrypted, available 24/7**, with always-on realtime collab — synced across web + desktop + mobile |
+| **Setup** | Install the app. That's it. | One command: `docker compose -f docker-compose.selfhost.yml up -d` |
+| **Availability** | Syncs when ≥1 of your devices/teammates is online | 24/7 — the box is always awake |
+| **Who holds data** | Nobody but you (no server copy) | **You** — on your own hardware, ciphertext only. *We host nothing.* |
+
+It's **one switch**: `NL_MODE=online` (default — the full online app) or `NL_MODE=p2p`
+(a pure relay that stores nothing). Same notes, same end-to-end encryption either way —
+the box never sees a key or a word of plaintext. The rest of this section is the
+full-online setup.
+
 You never *need* a server — the desktop app is pure P2P. But you can run **the whole
 thing yourself**: the **web app** (so teammates use it in a browser, nothing to
 install) *and* the **relay**, on your own domain like `docs.yourcompany.com`. There
@@ -189,6 +204,11 @@ docker compose -f docker-compose.selfhost.yml up -d
 Point a DNS **A record** at the box, open ports 80/443, and visit
 `https://docs.yourcompany.com`. HTTPS is provisioned and renewed automatically; the
 app and its sync share one origin, so there's nothing else to configure.
+
+This comes up in **full online mode** by default — the box stores your encrypted
+notes and serves them 24/7. To run it as a **pure peer-to-peer relay** that stores
+nothing instead, set `NL_MODE=p2p` in `.env`. (Members can also flip their own client
+back to P2P from inside the app — click the sync dot next to a teamspace.)
 
 ### Option B — Web app on Vercel / Netlify / Cloudflare Pages
 
