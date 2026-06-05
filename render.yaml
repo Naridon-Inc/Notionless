@@ -1,0 +1,23 @@
+# Render Blueprint — deploy the Notionless signaling relay (a long-running
+# WebSocket service). Point your web app's VITE_SIGNALING_URL at the resulting
+# https URL with a wss:// scheme and /signaling path, e.g.
+#   wss://notionless-relay.onrender.com/signaling
+#
+# Render injects $PORT; the relay reads it automatically. The free tier sleeps
+# when idle — use a paid instance (or keep ≥1 peer connected) for always-on sync.
+services:
+  - type: web
+    name: notionless-relay
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    plan: starter
+    envVars:
+      - key: RELAY_ONLY
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      # Lock the relay to the origin(s) your web app is served from:
+      # - key: ALLOWED_ORIGINS
+      #   value: https://notes.yourcompany.com

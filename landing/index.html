@@ -297,6 +297,39 @@
         .foot-col a:hover { color: var(--text); }
         .foot-bottom { margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--line-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; color: var(--faint); font-size: 13px; }
         .foot-bottom .mono { font-family: var(--mono); }
+
+        /* ── Self-host: platform deploy tabs ── */
+        .deploy { margin-top: 60px; }
+        .deploy-head { text-align: center; margin-bottom: 22px; }
+        .deploy-head .eyebrow { justify-content: center; }
+        .deploy-title { font-size: 26px; letter-spacing: -0.02em; margin: 8px 0 8px; }
+        .deploy-sub { color: var(--muted); max-width: 600px; margin: 0 auto; font-size: 15px; line-height: 1.6; }
+        .deploy-tabbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 auto 20px; max-width: 820px; }
+        .deploy-tab { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; cursor: pointer; transition: color .15s, background .15s, border-color .15s; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .deploy-tab:hover { color: var(--text); border-color: var(--accent-line); }
+        .deploy-tab.active { color: #fff; background: var(--accent-soft); border-color: var(--accent); }
+        .deploy-tab .pill { font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+        .deploy-tab.active .pill { color: var(--accent-bright); border-color: var(--accent-line); }
+        .deploy-panel { display: none; max-width: 720px; margin: 0 auto; }
+        .deploy-panel.active { display: block; animation: deployfade .25s ease; }
+        @keyframes deployfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+        .deploy-note { margin-top: 16px; color: var(--muted); font-size: 14.5px; line-height: 1.65; text-align: center; max-width: 620px; margin-left: auto; margin-right: auto; }
+        .deploy-note b { color: var(--text); }
+        .deploy-note code, .deploy-foot code { font-family: var(--mono); font-size: 12.5px; background: var(--panel-2); border: 1px solid var(--line-soft); border-radius: 5px; padding: 1px 6px; color: var(--green); }
+        .deploy-foot { text-align: center; margin-top: 26px; color: var(--faint); font-size: 14px; }
+        .deploy-foot a { color: var(--accent-bright); text-decoration: none; font-weight: 600; }
+        .deploy-foot a:hover { text-decoration: underline; }
+        .ai-prompt { max-width: 720px; margin: 0 auto; background: var(--bg-frame); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); }
+        .ai-prompt-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px 9px 16px; border-bottom: 1px solid var(--line-soft); }
+        .ai-prompt-bar .t { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+        .ai-copy { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--accent-bright); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 7px; padding: 5px 12px; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
+        .ai-copy:hover { background: rgba(47,158,110,0.22); }
+        .ai-copy.copied { color: #fff; background: var(--accent); border-color: var(--accent); }
+        .ai-prompt-body { margin: 0; padding: 16px 18px 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 340px; overflow: auto; }
+        @media (max-width: 640px) {
+            .deploy-tabbar { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+            .deploy-tab { flex: 0 0 auto; }
+        }
     </style>
 </head>
 <body>
@@ -311,6 +344,7 @@
                 <a href="#brain" class="hide-sm">Brain</a>
                 <a href="#showcase" class="hide-sm">Tour</a>
                 <a href="#architecture" class="hide-sm">Under the hood</a>
+                <a href="#selfhost" class="hide-sm">Self-host</a>
                 <a href="#security" class="hide-sm">Security</a>
                 <a href="https://github.com/Naridon-Inc/Notionless" target="_blank" rel="noopener">GitHub</a>
                 <a href="#download" class="nav-cta">Download</a>
@@ -464,8 +498,8 @@
                 </div>
                 <div class="feature">
                     <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M5 12a7 7 0 0 1 14 0M5 12a7 7 0 0 0 14 0" stroke-linecap="round"/><circle cx="12" cy="12" r="9"/></svg></div>
-                    <h3>Self-host or use ours</h3>
-                    <p>The only thing online is a tiny stateless signaling relay. Run your own in seconds, or use the free public one at <code>oss.naridon.com</code>.</p>
+                    <h3>Self-host the whole app</h3>
+                    <p>Run the web app <i>and</i> the relay on your own domain with one <code>docker compose</code> — automatic HTTPS, no database. Or just use the free public relay at <code>oss.naridon.com</code>.</p>
                 </div>
             </div>
         </div>
@@ -576,6 +610,167 @@
                     <h3>Share one link</h3>
                     <p>Send the <code>notionless://invite</code> link. Teammates open it in the app and start editing with you in real time, peer-to-peer.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ───────── Self-host ───────── -->
+    <section class="section-pad brain" id="selfhost" style="border-top: 1px solid var(--line-soft);">
+        <div class="brain-glow" aria-hidden="true"></div>
+        <div class="container">
+            <div class="brain-grid">
+                <div>
+                    <div class="eyebrow">Self-host</div>
+                    <h2>Run the whole thing<br>on your own domain.</h2>
+                    <p class="lead">
+                        Don't want to depend on us at all? Host the <b>web app</b> and the relay yourself
+                        with <b>one command</b> — at your own address like <code>docs.yourcompany.com</code>.
+                        HTTPS is automatic, there's <b>no database to set up</b>, and your team just opens it
+                        in a browser. Nothing to install.
+                    </p>
+                    <ul class="brain-points">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><b>One command.</b> <code>docker compose up</code> brings up the web app + relay together — no Postgres, no Redis, no config files.</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><b>Custom domain, automatic HTTPS.</b> Point DNS at the box and a Let's Encrypt certificate is fetched and renewed for you — you configure nothing.</span></li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> <span><b>Optional company sign-in.</b> Flip on email/password access for your instance — though, because notes stay end-to-end encrypted, an account only gates access, never your content.</span></li>
+                    </ul>
+                    <div class="alt-links" style="margin-top:26px; justify-content:flex-start;">
+                        <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">Self-hosting guide</a>
+                        <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTED_SYNC.md" target="_blank" rel="noopener">Always-on sync box</a>
+                    </div>
+                </div>
+                <div class="term" role="img" aria-label="A terminal self-hosting Notionless: copying the env file, setting NL_DOMAIN to docs.yourcompany.com, running docker compose up, and the relay plus web app coming online with an automatic certificate.">
+                    <div class="term-bar"><i></i><i></i><i></i><span class="t">self-host — notionless</span></div>
+                    <div class="term-body">
+<span class="row"><span class="k">$</span> cp .env.selfhost.example .env</span>
+<span class="row"><span class="k"># set</span> <span class="q">NL_DOMAIN=docs.yourcompany.com</span></span>
+<span class="row"><span class="k">$</span> docker compose -f docker-compose.selfhost.yml up -d</span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> relay   <span class="k">started · stores only ciphertext</span></span>
+<span class="row"><span class="ok">✓</span> web     <span class="q">https://docs.yourcompany.com</span> <span class="k">· cert issued</span></span>
+<span class="row"><span class="ok">✓</span> ready   <span class="k">open it in any browser</span> <span class="cur"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- platform deploy tabs -->
+            <div class="deploy">
+                <div class="deploy-head">
+                    <div class="eyebrow c">Deploy anywhere</div>
+                    <h3 class="deploy-title">Pick your platform</h3>
+                    <p class="deploy-sub">Two pieces — a static <b>web app</b> and a tiny <b>relay</b>. Run both on one box, or split them across the hosts you already use.</p>
+                </div>
+                <div class="deploy-tabbar" role="tablist" aria-label="Self-host platforms">
+                    <button class="deploy-tab active" role="tab" aria-selected="true" data-deploy="d-ai">Ask Claude <span class="pill">AI</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-docker">Docker <span class="pill">Both</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-vercel">Vercel <span class="pill">Web</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-netlify">Netlify <span class="pill">Web</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-cf">Cloudflare <span class="pill">Web</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-fly">Fly.io <span class="pill">Relay</span></button>
+                    <button class="deploy-tab" role="tab" aria-selected="false" data-deploy="d-render">Render <span class="pill">Relay</span></button>
+                </div>
+
+                <div class="deploy-panel active" id="d-ai" role="tabpanel">
+                    <div class="ai-prompt">
+                        <div class="ai-prompt-bar"><span class="t">paste into Claude Code (or any coding agent)</span><button class="ai-copy" type="button" data-copy="ai-prompt-text">Copy prompt</button></div>
+<pre class="ai-prompt-body" id="ai-prompt-text">Set up Notionless (github.com/Naridon-Inc/Notionless) on this machine — a
+self-hosted, end-to-end-encrypted Notion alternative.
+
+1. Ensure Docker + Docker Compose are installed and running.
+2. Clone the repo if it isn't already here, then cd in.
+3. Copy .env.selfhost.example to .env. Ask me for my domain and email, and set
+   NL_DOMAIN and NL_TLS_EMAIL. For a local-only test, set NL_DOMAIN=:80 instead.
+4. Run: docker compose -f docker-compose.selfhost.yml up -d
+5. Wait until healthy, check /health, and tell me the URL to open. If I gave a
+   domain, remind me to point a DNS A record here and open ports 80 and 443.
+
+Explain each step as you go, and confirm before anything destructive.</pre>
+                    </div>
+                    <p class="deploy-note"><b>Zero terminal.</b> Hand this to a coding agent on your server or laptop and it clones, configures, launches, and gives you a URL — asking for your domain along the way.</p>
+                </div>
+
+                <div class="deploy-panel" id="d-docker" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">docker compose — web app + relay</span></div>
+                        <div class="term-body">
+<span class="row"><span class="k">$</span> cp .env.selfhost.example .env</span>
+<span class="row"><span class="k"># set</span> <span class="q">NL_DOMAIN=docs.yourcompany.com</span></span>
+<span class="row"><span class="k">$</span> docker compose -f docker-compose.selfhost.yml up -d</span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> web + relay <span class="k">· one origin · automatic HTTPS</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>The whole thing on one box.</b> Web app and relay together, with automatic Let's Encrypt HTTPS on your domain — no database, no config files. <b>Recommended.</b></p>
+                </div>
+
+                <div class="deploy-panel" id="d-vercel" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">vercel — web app (static)</span></div>
+                        <div class="term-body">
+<span class="row"><span class="k">↳</span> import the repo at <span class="q">vercel.com/new</span></span>
+<span class="row"><span class="k"># build + output read from</span> vercel.json</span>
+<span class="row"><span class="pr">env</span>  <span class="q">VITE_SIGNALING_URL = wss://…/signaling</span></span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> static UI <span class="k">on Vercel's edge network</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>UI on Vercel's CDN.</b> Point <code>VITE_SIGNALING_URL</code> at your own relay or the free public one. There's a one-click <b>Deploy</b> button in the README.</p>
+                </div>
+
+                <div class="deploy-panel" id="d-netlify" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">netlify — web app (static)</span></div>
+                        <div class="term-body">
+<span class="row"><span class="k">↳</span> import the repo at <span class="q">app.netlify.com</span></span>
+<span class="row"><span class="k"># settings read from</span> netlify.toml</span>
+<span class="row"><span class="pr">env</span>  <span class="q">VITE_SIGNALING_URL = wss://…/signaling</span></span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> static UI <span class="k">· free auto-TLS domain</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>UI on Netlify.</b> Build command and SPA redirects come from the committed <code>netlify.toml</code> — import and go.</p>
+                </div>
+
+                <div class="deploy-panel" id="d-cf" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">cloudflare pages — web app (static)</span></div>
+                        <div class="term-body">
+<span class="row"><span class="pr">build</span>   <span class="q">pnpm run build:web</span></span>
+<span class="row"><span class="pr">output</span>  <span class="q">dist-web</span></span>
+<span class="row"><span class="pr">env</span>     <span class="q">VITE_SIGNALING_URL = wss://…/signaling</span></span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> static UI <span class="k">on Cloudflare's edge</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>UI on Cloudflare Pages.</b> Add a <code>_redirects</code> file with <code>/* /index.html 200</code> for SPA routing. GitHub Pages works the same way.</p>
+                </div>
+
+                <div class="deploy-panel" id="d-fly" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">fly.io — relay</span></div>
+                        <div class="term-body">
+<span class="row"><span class="k">$</span> cd backend &amp;&amp; fly launch --copy-config</span>
+<span class="row"><span class="k">$</span> fly deploy</span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> relay <span class="q">wss://your-app.fly.dev/signaling</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>The relay (the WebSocket piece).</b> Uses the committed <code>backend/fly.toml</code> and stays always-on. Pair it with any static web host above.</p>
+                </div>
+
+                <div class="deploy-panel" id="d-render" role="tabpanel">
+                    <div class="term">
+                        <div class="term-bar"><i></i><i></i><i></i><span class="t">render — relay (blueprint)</span></div>
+                        <div class="term-body">
+<span class="row"><span class="k">↳</span> New → Blueprint → <span class="q">pick this repo</span></span>
+<span class="row"><span class="k"># Docker + health check from</span> render.yaml</span>
+<span class="row">&nbsp;</span>
+<span class="row"><span class="ok">✓</span> relay <span class="q">wss://your-svc.onrender.com/signaling</span> <span class="cur"></span></span>
+                        </div>
+                    </div>
+                    <p class="deploy-note"><b>The relay via Render Blueprint.</b> Use a paid instance so the WebSocket connection doesn't sleep.</p>
+                </div>
+
+                <p class="deploy-foot">Full step-by-step for every platform → <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">self-hosting guide</a></p>
             </div>
         </div>
     </section>
@@ -728,8 +923,12 @@
                     <p>The only hosted piece is a tiny stateless signaling relay that helps peers find each other. It sees hashed topic names and end-to-end-encrypted blobs — never your note titles, content, or keys — and it stores nothing.</p>
                 </details>
                 <details>
-                    <summary>Can I self-host the relay? <span class="chev">+</span></summary>
-                    <p>Absolutely. It's a small Node service with no database. Run it with Docker in seconds and point the app at it with <code>VITE_SIGNALING_URL</code>, or use the free public relay at <code>oss.naridon.com</code>.</p>
+                    <summary>Can I self-host it on my own domain? <span class="chev">+</span></summary>
+                    <p>Yes — the whole thing, not just the relay. Clone the repo, copy <code>.env.selfhost.example</code> to <code>.env</code>, set <code>NL_DOMAIN=docs.yourcompany.com</code>, and run <code>docker compose -f docker-compose.selfhost.yml up -d</code>. That brings up the <b>web app and the relay together</b> on your domain, with an automatic Let's Encrypt certificate — <b>no database to set up</b>. Your team just opens it in a browser; nothing to install. Prefer only the relay? Point a desktop build at it with <code>VITE_SIGNALING_URL</code>. See the <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">self-hosting guide</a>.</p>
+                </details>
+                <details>
+                    <summary>Is there a web app, and can it have a company login? <span class="chev">+</span></summary>
+                    <p>When you self-host, yes — the same app runs in the browser at your domain, so teammates don't have to install anything. You can optionally turn on an email/password <b>sign-in gate</b> for your instance (the first account becomes the admin). Important: because your notes are end-to-end encrypted, that account only controls <i>access to the instance</i> — it can <b>never</b> decrypt your content. You still join teams with the team link + password, exactly as in the zero-account desktop flow.</p>
                 </details>
                 <details>
                     <summary>Is the macOS app signed and notarized? <span class="chev">+</span></summary>
@@ -760,6 +959,7 @@
                         <a href="#brain">Company Brain</a>
                         <a href="#showcase">Product tour</a>
                         <a href="#architecture">Under the hood</a>
+                        <a href="#selfhost">Self-host</a>
                         <a href="#security">Security</a>
                         <a href="#download">Download</a>
                     </div>
@@ -772,7 +972,7 @@
                     <div class="foot-col">
                         <h5>Infrastructure</h5>
                         <a href="https://oss.naridon.com/health" target="_blank" rel="noopener">Relay status</a>
-                        <a href="https://github.com/Naridon-Inc/Notionless#self-hosting" target="_blank" rel="noopener">Self-hosting</a>
+                        <a href="https://github.com/Naridon-Inc/Notionless/blob/master/docs/SELF_HOSTING.md" target="_blank" rel="noopener">Self-hosting guide</a>
                     </div>
                 </div>
             </div>
@@ -796,6 +996,46 @@
                 img.src = img.src.replace(/motion-(\w+)\.webp$/, 'shot-$1.png');
             });
         }
+
+        // Self-host platform tabs.
+        document.querySelectorAll('.deploy-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                var id = tab.getAttribute('data-deploy');
+                document.querySelectorAll('.deploy-tab').forEach(function (t) {
+                    var on = t === tab;
+                    t.classList.toggle('active', on);
+                    t.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+                document.querySelectorAll('.deploy-panel').forEach(function (p) {
+                    p.classList.toggle('active', p.id === id);
+                });
+            });
+        });
+
+        // Copy-to-clipboard for the "Ask Claude" setup prompt.
+        document.querySelectorAll('.ai-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var el = document.getElementById(btn.getAttribute('data-copy'));
+                if (!el) return;
+                var done = function () {
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(function () { btn.textContent = 'Copy prompt'; btn.classList.remove('copied'); }, 1800);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(el.textContent).then(done, done);
+                } else {
+                    var r = document.createRange(); r.selectNode(el);
+                    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+                    try { document.execCommand('copy'); } catch (e) {}
+                    s.removeAllRanges(); done();
+                }
+            });
+        });
     </script>
+
+    <!-- First-party, cookieless, DNT-respecting page analytics (self-hosted on our
+         own relay; no third parties). See landing/analytics.js + backend/src/analytics.js. -->
+    <script src="/analytics.js" defer></script>
 </body>
 </html>

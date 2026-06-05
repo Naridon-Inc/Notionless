@@ -1,0 +1,55 @@
+# Notionless web app — Caddy config.
+#
+# Serves the static SPA and reverse-proxies the relay's API/WebSocket paths so
+# the whole thing lives on ONE origin (no CORS, no second hostname). config.js
+# detects same-origin and points signaling at wss://<this-host>/signaling, so a
+# self-hoster sets nothing but the domain.
+#
+# Custom domain + automatic HTTPS: set NL_DOMAIN to your hostname
+# (e.g. docs.example.com) and Caddy provisions + renews a Let's Encrypt cert on
+# its own. Default `:80` serves plain HTTP for local `docker compose up`.
+{
+	# ACME account email (optional, for cert-expiry notices). The entrypoint
+	# writes this file: `email <addr>` when NL_TLS_EMAIL is set, else empty.
+	import /etc/caddy/email.conf
+	# Quiet the admin endpoint; we drive everything from this file.
+	admin off
+}
+
+{$NL_DOMAIN::80} {
+	encode zstd gzip
+
+	# --- relay: HTTP API + analytics collector ---
+	handle /api/* {
+		reverse_proxy {$NL_RELAY_UPSTREAM:relay:9008}
+	}
+	handle /health {
+		reverse_proxy {$NL_RELAY_UPSTREAM:relay:9008}
+	}
+
+	# --- relay: WebSocket paths (Caddy upgrades automatically) ---
+	# WebRTC signaling — the primary P2P sync path.
+	handle /signaling {
+		reverse_proxy {$NL_RELAY_UPSTREAM:relay:9008}
+	}
+	# Optional always-on encrypted cloud sync (only if the relay enables it).
+	handle /yjs {
+		reverse_proxy {$NL_RELAY_UPSTREAM:relay:9008}
+	}
+
+	# --- runtime config: never cache it ---
+	@nlconfig path /nlconfig.js
+	header @nlconfig Cache-Control "no-store"
+
+	# --- everything else: the SPA ---
+	handle {
+		root * /srv
+		# Vite-hashed asset filenames are safe to cache forever.
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		# index.html must never be cached so new bundle refs land immediately.
+		header /index.html Cache-Control "no-store"
+		try_files {path} /index.html
+		file_server
+	}
+}

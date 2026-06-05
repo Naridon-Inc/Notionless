@@ -1,4 +1,5 @@
 import { fileSystem } from '../src/filesystem-proxy'
+import { ensureAccount } from './account-gate'
 
 /**
  * Web Platform Bootstrap
@@ -405,10 +406,15 @@ if (typeof window !== 'undefined' && window.api && !window.api.git) {
 async function bootstrap() {
     document.body.classList.add('is-web'); // Mark as web
 
-    // NOTE: Notionless ships as a desktop (Mac) app only — there is no hosted
-    // web app. This web build exists purely for local collaboration/sync testing
-    // (run it alongside an Electron instance against the same relay). It is not
-    // deployed and has no invite-landing interstitial.
+    // This web build is the SELF-HOST surface: the same renderer the desktop app
+    // ships, served by the relay container so a team can run Notionless on their
+    // own domain (docs.example.com) with one `docker compose up`. It also doubles
+    // as the local collaboration/sync test client during development.
+
+    // Optional account gate. No-op unless this instance runs with accounts on
+    // (relay ACCOUNTS_ENABLED); then it blocks here until the visitor signs in.
+    // Notes stay E2EE regardless — this only controls instance access.
+    await ensureAccount();
 
     // Clear skeleton if exists
     const app = document.getElementById('app');

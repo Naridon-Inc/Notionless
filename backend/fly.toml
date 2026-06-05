@@ -1,0 +1,33 @@
+# Fly.io config for the Notionless signaling relay.
+#
+#   cd backend
+#   fly launch --copy-config --no-deploy   # or: fly launch (accept this file)
+#   fly deploy
+#
+# Then point your web app at it:
+#   VITE_SIGNALING_URL = wss://<app-name>.fly.dev/signaling
+#
+# Fly routes to internal_port; the relay defaults to 9008 (no PORT needed).
+app = "notionless-relay"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  RELAY_ONLY = "true"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 9008
+  force_https = true
+  # A signaling relay should stay up so peers can always find each other.
+  auto_stop_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"

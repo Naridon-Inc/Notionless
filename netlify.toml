@@ -1,0 +1,17 @@
+# Deploy the Notionless web app (static SPA) on Netlify.
+# It still needs a relay for sync — set VITE_SIGNALING_URL in the Netlify UI
+# (Site settings → Environment variables) to your own relay or the public one:
+#   VITE_SIGNALING_URL = wss://your-relay.example.com/signaling
+#   (or wss://oss.naridon.com/signaling to use the public relay)
+[build]
+  command = "pnpm run build:web"
+  publish = "dist-web"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback — serve index.html for client-side routes (real files win first).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

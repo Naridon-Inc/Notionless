@@ -1,3 +1,17 @@
 node_modules
 npm-debug.log
 .DS_Store
+
+# Never bake secrets or runtime state into the relay image.
+.env
+.env.*
+.analytics
+.accounts
+data
+
+# Dev-only test + scratch.
+test-accounts.mjs
+*.log
+
+# (public/ and src/ are intentionally NOT ignored — the relay serves the
+# marketing page from public/ and runs from src/.)

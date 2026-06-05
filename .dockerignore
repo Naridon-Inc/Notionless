@@ -1,0 +1,38 @@
+# Keep the web-image build context small + reproducible. The web Dockerfile's
+# build context is the repo ROOT (it needs package.json + src/renderer), so trim
+# everything the `pnpm run build:web` step doesn't read.
+.git
+node_modules
+**/node_modules
+dist
+dist-web
+dist-mobile
+out
+release
+
+# Generated native mobile projects + their pods/caches (huge, regenerated).
+apps/mobile-native/ios
+apps/mobile-native/android
+**/.expo
+
+# Local-only state + secrets.
+.env
+.env.*
+!.env.example
+backend/.analytics
+backend/public
+**/.notionless/history
+**/.notionless/brain-index.json
+
+# Marketing/build artifacts not needed by the app build.
+producthunt
+landing/*.png
+landing/*.webp
+*.dmg
+*.zip
+
+# Editor/OS cruft.
+.DS_Store
+*.log
+.vite
+.aura

@@ -1,0 +1,84 @@
+# Notionless — self-host the whole thing in one command.
+#
+#   1. cp .env.selfhost.example .env
+#   2. edit .env  → set NL_DOMAIN=docs.yourcompany.com  (and NL_TLS_EMAIL)
+#   3. docker compose -f docker-compose.selfhost.yml up -d
+#
+# That's it. The `web` service serves the app AND reverse-proxies the relay, so
+# everything lives on ONE origin — point your DNS A record at the box and Caddy
+# fetches a Let's Encrypt cert for your domain automatically. No database to set
+# up, no second hostname, no CORS to configure.
+#
+# Local test (no domain, plain HTTP): leave NL_DOMAIN=:80 and open
+# http://localhost — see .env.selfhost.example.
+
+services:
+  # The stateless WebRTC signaling relay (+ optional encrypted always-on sync,
+  # + the marketing-site analytics collector if you serve the landing page).
+  # Not published to the host — only the `web` service talks to it.
+  relay:
+    build: ./backend
+    expose:
+      - "9008"
+    environment:
+      - PORT=9008
+      - NODE_ENV=production
+      # Restrict which web origins may call the relay's HTTP API. Defaults to
+      # your domain; the same-origin web app is always allowed.
+      - ALLOWED_ORIGINS=${NL_ALLOWED_ORIGINS:-}
+      # Always-on encrypted sync: the relay keeps each note's CIPHERTEXT here so
+      # notes stay available 24/7 even with every laptop closed. It can never
+      # read them. Blank this (and NL_CLOUD_SYNC_URL) for pure stateless P2P.
+      - YJS_PERSIST_DIR=${NL_PERSIST_DIR:-/data}
+      # Optional accounts layer (hybrid identity). OFF unless NL_ACCOUNTS=1. An
+      # access gate for this web instance — it never holds note keys (E2EE stays
+      # intact). See accounts.js + docs/SELF_HOSTING.md.
+      - ACCOUNTS_ENABLED=${NL_ACCOUNTS:-}
+      - ACCOUNTS_SIGNUP=${NL_ACCOUNTS_SIGNUP:-open}
+      - ACCOUNTS_STRICT=${NL_ACCOUNTS_STRICT:-}
+      # Set a fixed secret so sessions survive relay restarts. openssl rand -hex 32
+      - ACCOUNTS_SECRET=${NL_ACCOUNTS_SECRET:-}
+      - ACCOUNTS_DIR=/data/accounts
+      # Optional first-party landing-page analytics (see docs/ANALYTICS.md).
+      - ANALYTICS_TOKEN=${NL_ANALYTICS_TOKEN:-}
+      - ANALYTICS_DIR=/data/analytics
+    volumes:
+      - notionless-data:/data
+    restart: unless-stopped
+
+  # The web app: builds the static bundle from this repo and serves it with
+  # Caddy (auto-HTTPS for your domain). This is the only public surface.
+  web:
+    build:
+      context: .
+      dockerfile: src/renderer/web/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Your public hostname → automatic Let's Encrypt HTTPS. `:80` = plain HTTP.
+      - NL_DOMAIN=${NL_DOMAIN:-:80}
+      - NL_TLS_EMAIL=${NL_TLS_EMAIL:-}
+      # The relay is reachable as the compose service name.
+      - NL_RELAY_UPSTREAM=relay:9008
+      # Tell clients to also mirror to the always-on box (matches YJS_PERSIST_DIR
+      # above). Blank both for pure P2P. "/yjs" resolves to this same origin.
+      - NL_CLOUD_SYNC_URL=${NL_CLOUD_SYNC_URL:-/yjs}
+      # Where the "Download the desktop app" links point (defaults to the
+      # official GitHub release). Point at your own mirror if you fork.
+      - NL_DOWNLOAD_URL=${NL_DOWNLOAD_URL:-}
+      # Optional accounts layer (hybrid identity). "1" enables the account UI;
+      # zero-account derived identity still works either way. See docs.
+      - NL_ACCOUNTS=${NL_ACCOUNTS:-}
+    depends_on:
+      - relay
+    volumes:
+      # Persist Caddy's certs + ACME account so it doesn't re-fetch on restart.
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  notionless-data:   # encrypted notes + analytics (relay)
+  caddy-data:        # TLS certs / ACME account (web)
+  caddy-config:      # Caddy autosave config (web)

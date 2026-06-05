@@ -13,6 +13,7 @@ lightsail-deployment.json
 .env
 .env.*
 !.env.example
+!.env.selfhost.example
 dist-web/
 *.cjs
 yarn.lock
@@ -38,6 +39,10 @@ yarn.lock
 # Logs / editor scratch
 *.log
 .vite/
+
+# First-party marketing-site analytics data (local append-only event store).
+# Anonymous + aggregate, but machine-local and not meant to be committed.
+backend/.analytics/
 
 # Mobile native (Expo / React Native)
 # node_modules + dist are already ignored above (match at any depth). These are

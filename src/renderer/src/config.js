@@ -1,52 +1,81 @@
+// Runtime-resolvable configuration. Resolution order for every value:
+//   1. window.__NL_CONFIG[KEY]  — a deploy-time override the host can inject WITHOUT
+//      rebuilding (the self-host web image writes this from env at container start),
+//   2. Vite build-time env (VITE_*),
+//   3. for the relay URL: the page's OWN origin (so one web image works on any
+//      self-host domain — wss://<your-host>/signaling),
+//   4. a sensible default (the official oss.naridon.com relay).
+//
+// This is what lets a self-hoster run the web app on `notes.example.com` and have
+// it talk to their own relay at the same origin, with zero rebuild and no config
+// files — just `docker compose up`.
+
+function rt(key) {
+  return (typeof window !== 'undefined' && window.__NL_CONFIG && window.__NL_CONFIG[key]) || undefined;
+}
+function viteEnv(key) {
+  return (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) || undefined;
+}
+// True when running as a real web app (served over http/https on a non-localhost
+// host). False in Electron (custom protocol) and on localhost dev.
+function isDeployedWeb() {
+  return typeof window !== 'undefined' && window.location
+    && /^https?:$/.test(window.location.protocol)
+    && window.location.hostname !== 'localhost'
+    && window.location.hostname !== '127.0.0.1';
+}
+function sameOriginWs(pathname) {
+  if (!isDeployedWeb()) return undefined;
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${proto}://${window.location.host}${pathname}`;
+}
+
 export const Config = {
-  // Notionless is a desktop (Mac) app only — there is no hosted web app. Invite
-  // links are `notionless://invite#team=…` deep links that open the installed
-  // desktop app directly; the secret rides in the URL fragment, so it never
-  // reaches any server. p2p.js builds team/note links from this scheme.
-  APP_DEEP_LINK:
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_APP_DEEP_LINK) ||
-    'notionless://invite',
+  // Invite deep link. `notionless://invite#team=…` opens the installed desktop
+  // app; the secret rides in the URL fragment and never reaches a server.
+  get APP_DEEP_LINK() {
+    return rt('APP_DEEP_LINK') || viteEnv('VITE_APP_DEEP_LINK') || 'notionless://invite';
+  },
 
-  // Where teammates who don't have the app yet go to install it.
-  // Open source under the Naridon-Inc org.
-  DOWNLOAD_URL:
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DOWNLOAD_URL) ||
-    'https://github.com/Naridon-Inc/notionless/releases/latest',
+  // Where teammates without the app go to install it.
+  get DOWNLOAD_URL() {
+    return rt('DOWNLOAD_URL') || viteEnv('VITE_DOWNLOAD_URL')
+      || 'https://github.com/Naridon-Inc/notionless/releases/latest';
+  },
 
-  // WebRTC signaling relay (the only server, and the only thing hosted at
-  // oss.naridon.com). Brokers peer connections; stores nothing — it sees only
-  // BLAKE2b-hashed room names and E2EE ciphertext. p2p.js ignores this on
-  // localhost dev (uses the local :4444 server instead). Override with
-  // VITE_SIGNALING_URL for a self-hosted relay.
-  SIGNALING_URL:
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SIGNALING_URL) ||
-    'wss://oss.naridon.com/signaling',
+  // WebRTC signaling relay. Brokers peer connections; stores nothing — it sees
+  // only BLAKE2b-hashed room names and E2EE ciphertext. On a deployed web app it
+  // defaults to the page's own origin (/signaling), so a self-hosted bundle needs
+  // no relay URL configured. p2p.js still adds the local :4444 server on localhost.
+  get SIGNALING_URL() {
+    return rt('SIGNALING_URL') || viteEnv('VITE_SIGNALING_URL')
+      || sameOriginWs('/signaling') || 'wss://oss.naridon.com/signaling';
+  },
 
   // OPTIONAL self-hosted "always-on" cloud sync. Empty by default → pure P2P
-  // (notes sync only while ≥1 teammate is online). Point this at your own relay's
-  // persisting Yjs endpoint (e.g. wss://notes.example.com/yjs) and the app ALSO
-  // mirrors each note's ENCRYPTED transport doc there, so the latest state is
-  // always available even when everyone's laptop is closed. The box only ever
-  // sees BLAKE2b-hashed room names and E2EE ciphertext — no accounts, no keys,
-  // no plaintext. See docs/SELF_HOSTED_SYNC.md. Override with VITE_CLOUD_SYNC_URL.
-  CLOUD_SYNC_URL:
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CLOUD_SYNC_URL) ||
-    '',
+  // (notes sync only while ≥1 teammate is online). Set it (or inject
+  // __NL_CONFIG.CLOUD_SYNC_URL = "/yjs" from the self-host bundle) and the app ALSO
+  // mirrors each note's ENCRYPTED transport doc to your box, so the latest state is
+  // always available even when everyone's laptop is closed. The box only ever sees
+  // hashed room names and ciphertext. See docs/SELF_HOSTED_SYNC.md.
+  get CLOUD_SYNC_URL() {
+    const v = rt('CLOUD_SYNC_URL') || viteEnv('VITE_CLOUD_SYNC_URL') || '';
+    // Allow a relative "/yjs" override to resolve against the current origin.
+    if (v && v.startsWith('/')) return sameOriginWs(v) || '';
+    return v;
+  },
 
-  // Local-first: default to a self-hosted relay/sync server on localhost.
-  // Override via desktop settings (apiUrl) or VITE_API_URL for the web build.
-  DEFAULT_API_URL:
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ||
-    'http://localhost:9008',
+  // Local-first: default to a self-hosted relay/sync server on localhost. On a
+  // deployed web app, the same origin serves the API.
+  get DEFAULT_API_URL() {
+    return rt('API_URL') || viteEnv('VITE_API_URL') || 'http://localhost:9008';
+  },
 
   async getApiUrl() {
     // If the web build is served from the same origin as the relay, use it.
-    if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')
-        && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        return window.location.origin;
-    }
+    if (isDeployedWeb()) return window.location.origin;
     // Check for user-configured API URL (desktop app settings)
-    if (window.api && window.api.getSettings) {
+    if (typeof window !== 'undefined' && window.api && window.api.getSettings) {
         try {
             const custom = await window.api.getSettings('apiUrl');
             if (custom) return custom;
